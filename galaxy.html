@@ -1,0 +1,141 @@
+<html>
+	<head>
+		<title>Canvas Zoom Example</title>
+		<style type="text/css">
+			body, img, p, h1, h2, h3, h4, h5, h6, fieldset, form, table, td, ul, li, pre, blockquote, code {
+				margin: 0;
+				padding: 0;
+				border: 0;
+			}
+			body {
+				font: 100% Georgia, "Times New Roman", serif;
+				background-color: #ffffff;
+				color: #565656;
+				text-align: center;
+			}
+			div.wrapper {
+				position: relative;
+				margin: 0 auto 30px auto;
+				width: 500px;
+				text-align: left;
+				border: solid 1px #aaaaaa;
+			}
+			#users {
+			}
+			#users .user {
+				border: solid 1px #bbbbbb;
+				background-color: #dddddd;
+				padding: 10px;
+				margin: 5px;
+			}
+			#users .user .controls {
+				float: right;
+			}
+			/*------------impromptu--------- */
+
+			.jqifade {
+				position: absolute;
+				background-color: #aaaaaa;
+			}
+			div.jqi {
+				width: 400px;
+				font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+				position: absolute;
+				background-color: #ffffff;
+				font-size: 11px;
+				text-align: left;
+				border: solid 1px #eeeeee;
+				-moz-border-radius: 10px;
+				-webkit-border-radius: 10px;
+				padding: 7px;
+			}
+			div.jqi .jqicontainer {
+				font-weight: bold;
+			}
+			div.jqi .jqiclose {
+				position: absolute;
+				top: 4px;
+				right: -2px;
+				width: 18px;
+				cursor: default;
+				color: #bbbbbb;
+				font-weight: bold;
+			}
+			div.jqi .jqimessage {
+				padding: 10px;
+				line-height: 20px;
+				color: #444444;
+			}
+			div.jqi .jqibuttons {
+				text-align: right;
+				padding: 5px 0 5px 0;
+				border: solid 1px #eeeeee;
+				background-color: #f4f4f4;
+			}
+			div.jqi button {
+				padding: 3px 10px;
+				margin: 0 10px;
+				background-color: #2F6073;
+				border: solid 1px #f4f4f4;
+				color: #ffffff;
+				font-weight: bold;
+				font-size: 12px;
+			}
+			div.jqi button:hover {
+				background-color: #728A8C;
+			}
+			div.jqi button.jqidefaultbutton {
+				background-color: #BF5E26;
+			}
+			.jqiwarning .jqi .jqibuttons {
+				background-color: #BF5E26;
+			}
+			/*-------------------------------- */ 
+
+			.fl-annotation {
+				background: transparent url(annotation.png) no-repeat center;
+				font: 11px/15px "Helvetica Neue",Helvetica,Arial,sans-serif;
+				height: 50px;
+				width: 160px;
+				padding: 15px;
+				color: white;
+				text-align: center;
+				//background-color: #ffffff;
+			}
+			
+		</style>
+	</head>
+	<body>
+		<h1>Canvas Zoom Example</h1>
+		<p>
+			<canvas id="zoomCanvas" width="800" height="400">
+				You need a browser with the HTML5 Canvas ability.
+			</canvas>
+			<br/>
+			<input type="button" value="Zoom in" onclick="galaxy.zoomInCentre()"/>
+			<input type="button" value="Zoom out" onclick="galaxy.zoomOutCentre()"/>
+			<a href="http://hubblesite.org/newscenter/archive/releases/2005/01/image/a/">Image of Spiral Galaxy NGC 1300 from Hubble Site</a>
+		</p>
+		</div>
+	</body>
+	<foot>
+		<script type="text/javascript" src="imageloader.min.js"></script>
+		<script type="text/javascript" src="canvaszoom.js"></script>
+		<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
+		<script type="text/javascript" src="jquery-impromptu.3.2.min.js"></script>
+		<script type="text/javascript">
+			var galaxy = new CanvasZoom({
+								'canvas': document.getElementById('zoomCanvas'), 
+								'tilesFolder': "galaxy", 
+								'imageWidth':6637,	//width 
+								'imageHeight':3787,	//height
+								'imageId':1234,	//image id
+								'drawBorder' : true,
+                        'defaultZoom' : 10,
+                        'minZoom' : 10,
+                        'maxZoom' : 14
+										});
+
+		</script>
+	</foot>
+</html>
