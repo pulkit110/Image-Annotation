@@ -55,19 +55,22 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 	var _annotationListY = [];
 	var _annotationListText = [];
 	var _annotationRadius = 15;
-	
+
 	var _scaleAnnotationListX = [];
 	var _scaleAnnotationListY = [];
-	
+
 	var _canvasOffsetX = 0;
 	var _canvasOffsetY = 0;
-	
+
 	var _currentAnnotation = false;
 	var _prevAnnotationIndex = -1;
 
 	var _imageUrl = "marker.png";
 	var _markerImage = new Image();
 	_markerImage.src = _imageUrl;
+
+	// The index of annotation on which the mouse is currently on
+	var _mouseOnAnnotation = -1;
 
 	if(_canvasOrSettings.getContext === UNDEFINED) {
 
@@ -87,8 +90,6 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 		_canvas = _canvasOrSettings;
 	}
 
-
-	
 	var _debug = FALSE;
 	var _debugShowRectangle = (_debug === FALSE) ? _debug : FALSE;
 	// Paint a rectangle rather than an image
@@ -141,46 +142,47 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 		//
 		var mouse = 'mouse';
 		// minify!
-		_canvas.addEventListener(mouse + 'move', function(e) { mouseMove(getEvent(e));
+		_canvas.addEventListener(mouse + 'move', function(e) {
+			mouseMove(getEvent(e));
 		}, TRUE);
-		_canvas.addEventListener(mouse + 'down', function(e) { mouseDown(getEvent(e));
+		_canvas.addEventListener(mouse + 'down', function(e) {
+			mouseDown(getEvent(e));
 		}, TRUE);
-		_canvas.addEventListener(mouse + 'up', function(e) { mouseUp(getEvent(e));
+		_canvas.addEventListener(mouse + 'up', function(e) {
+			mouseUp(getEvent(e));
 		}, TRUE);
-
-		_canvas.addEventListener(mouse + 'out', function(e) { mouseOut(getEvent(e));
+		_canvas.addEventListener(mouse + 'out', function(e) {
+			mouseOut(getEvent(e));
 		}, TRUE);
-		_canvas.addEventListener(mouse + 'over', function(e) { mouseOver(getEvent(e));
+		_canvas.addEventListener(mouse + 'over', function(e) {
+			mouseOver(getEvent(e));
 		}, TRUE);
-		_canvas.addEventListener('DOMMouseScroll', function(e) { mouseWheel(getEvent(e));
+		_canvas.addEventListener('DOMMouseScroll', function(e) {
+			mouseWheel(getEvent(e));
 		}, TRUE);
-		_canvas.addEventListener(mouse + 'wheel', function(e) { mouseWheel(getEvent(e));
+		_canvas.addEventListener(mouse + 'wheel', function(e) {
+			mouseWheel(getEvent(e));
 		}, TRUE);
 		// Keep track even if mouse is outside of canvas while dragging image
-		window.addEventListener(mouse + 'up', function(e) { mouseUpWindow(getEvent(e));
+		window.addEventListener(mouse + 'up', function(e) {
+			mouseUpWindow(getEvent(e));
 		}, FALSE);
-		window.addEventListener(mouse + 'move', function(e) { mouseMoveWindow(getEvent(e));
+		window.addEventListener(mouse + 'move', function(e) {
+			mouseMoveWindow(getEvent(e));
 		}, FALSE);
 		_ctx = _canvas.getContext('2d');
 
-$.getJSON("getAnnotations.php", {
-		format : "json",
-		imageId: _imageId
-	}, function(data) {
-		for(var i = 0; i < data.length; ++i) {
-			_annotationListX.push(parseFloat(data[i].x));
-			_annotationListY.push(parseFloat(data[i].y));
-			_annotationListText.push(data[i].text);
-		}
-		paint();
-	});
-
-//////////////////////////////////////////////////////////////////////////////////////
-		_annotationListX.push(3168.5);
-		_annotationListY.push(1807.5);
-		_annotationListText.push("Test");
-		//////////////////////////////////////////////////////////////////////////////////////
-		
+		$.getJSON("getAnnotations.php", {
+			format : "json",
+			imageId: _imageId
+		}, function(data) {
+			for(var i = 0; i < data.length; ++i) {
+				_annotationListX.push(parseFloat(data[i].x));
+				_annotationListY.push(parseFloat(data[i].y));
+				_annotationListText.push(data[i].text);
+			}
+			paint();
+		});
 		paint();
 	};
 	// Helper function
@@ -209,75 +211,95 @@ $.getJSON("getAnnotations.php", {
 
 		if(_mouseX === _mouseDownX && _mouseY === _mouseDownY) {
 
-			//////////////////////Add Annotation///////////////////////////////
-			var scaledAnnotationX = _mouseX - _offsetX;
-			var scaledAnnotationY = _mouseY - _offsetY;
+			if (_mouseOnAnnotation !== -1) {
+				//Show annotation at i
+				var txt = _annotationListText[_mouseOnAnnotation];
+				$.prompt(txt, {
+					buttons: {},
+					persistent: false	//Allow closing box by clicking on facade
+				});
 
-			var width = _tileZoomArray[_zoomLevel][_aGetWidth];
-			var height = _tileZoomArray[_zoomLevel][_aGetHeight];
-			if(_mouseX > _offsetX && _mouseY > _offsetY && _mouseX < _offsetX + width && _mouseY < _offsetY + height) {
-				for(var i = _zoomLevel; i < _zoomLevelMax; ++i) {
-					var scale = _tileZoomArray[i+1][_aGetWidth] / _tileZoomArray[i][_aGetWidth];
-					scaledAnnotationX *= scale;
-					scaledAnnotationY *= scale;
-				}
-				
-				//Add mark on the image
-				_annotationListX.push(scaledAnnotationX);
-				_annotationListY.push(scaledAnnotationY);
-				_annotationListText.push("Unassigned Tag");
-				paint();
-					
-				var txt = 'Enter the tag:<br /> <input type="text" id="alertName" name="myname" value="" />';
-				function mysubmitfunc(v, m, f) {
-					an = m.children('#alertName');
+			} else {
 
-					if(f.myname == "") {
-						an.css("border", "solid #ff0000 1px");
-						return false;
-					} else {
-						//////////////////////////////////////////////////////////////////////////////////////
-						$.post("addAnnotation.php", {
-							x : scaledAnnotationX,
-							y : scaledAnnotationY,
-							text : f.myname,
-							imageId : _imageId
-						});
-						//////////////////////////////////////////////////////////////////////////////////////
+				//////////////////////Add Annotation///////////////////////////////
+				var scaledAnnotationX = _mouseX - _offsetX;
+				var scaledAnnotationY = _mouseY - _offsetY;
+
+				var width = _tileZoomArray[_zoomLevel][_aGetWidth];
+				var height = _tileZoomArray[_zoomLevel][_aGetHeight];
+				if(_mouseX > _offsetX && _mouseY > _offsetY && _mouseX < _offsetX + width && _mouseY < _offsetY + height) {
+					for(var i = _zoomLevel; i < _zoomLevelMax; ++i) {
+						var scale = _tileZoomArray[i+1][_aGetWidth] / _tileZoomArray[i][_aGetWidth];
+						scaledAnnotationX *= scale;
+						scaledAnnotationY *= scale;
 					}
-					
-					// Pop the temporarily added annotation (used for showing mark) 
-					_annotationListX.pop();
-					_annotationListY.pop();
-					_annotationListText.pop();
-					
-					// Add the correct annotation
+
+					//Add mark on the image
 					_annotationListX.push(scaledAnnotationX);
 					_annotationListY.push(scaledAnnotationY);
-					_annotationListText.push(f.myname);
-
+					_annotationListText.push("Unassigned Tag");
 					paint();
-					return true;
+
+					var txt = 'Enter the tag:<br /> <textarea id="annotationTextField" name="myname" value="" />';
+					function mysubmitfunc(v, m, f) {
+						an = m.children('#annotationTextField');
+
+						if(f.myname == "") {
+							an.css("border", "solid #ff0000 1px");
+							return false;
+						} else {
+							//////////////////////////////////////////////////////////////////////////////////////
+							$.post("addAnnotation.php", {
+								x : scaledAnnotationX,
+								y : scaledAnnotationY,
+								text : f.myname,
+								imageId : _imageId
+							});
+							//////////////////////////////////////////////////////////////////////////////////////
+						}
+
+						// Pop the temporarily added annotation (used for showing mark)
+						_annotationListX.pop();
+						_annotationListY.pop();
+						_annotationListText.pop();
+
+						// Add the correct annotation
+						_annotationListX.push(scaledAnnotationX);
+						_annotationListY.push(scaledAnnotationY);
+						_annotationListText.push(f.myname);
+
+						paint();
+						return true;
+					}
 
 				}
 
-
-				function removeLastAnnotationOnCancel(v,m,f){
+				function removeLastAnnotationOnCancel(v,m,f) {
 					if (typeof v == "undefined") {
-						// Pop the temporarily added annotation (used for showing mark) 
+						// Pop the temporarily added annotation (used for showing mark)
 						_annotationListX.pop();
 						_annotationListY.pop();
 						_annotationListText.pop();
 						paint();
+					}
+					var editor = CKEDITOR.instances['annotationTextField'];
+					if (editor) {
+						editor.destroy(true);
 					}
 				}
 
 				$.prompt(txt, {
 					submit : mysubmitfunc,
 					callback: removeLastAnnotationOnCancel,
+					persistent: false,	//Allow closing box by clicking on facade
 					buttons : {
 						Ok : true
 					}
+				});
+				$( '#annotationTextField' ).ckeditor();
+				$('.jqifade').click(function () {
+					//remove temporarily added annotation when closed by clicking on fade
+					removeLastAnnotationOnCancel();
 				});
 			}
 			/////////////////////////////////////////////////////
@@ -305,35 +327,34 @@ $.getJSON("getAnnotations.php", {
 			var element = _canvas;
 			_canvasOffsetX = $(_canvas).offset().left;
 			_canvasOffsetY = $(_canvas).offset().top;
-			//if (element.offsetParent) {
-			//	do {
-			//		_canvasOffsetX += element.offsetLeft;
-			//		_canvasOffsetY += element.offsetTop;
-			//		element = element.offsetParent;
-			//	} while (element);
-			//}
-		
+
 			var l = _annotationListX.length;
 			var i = 0;
 
 			for(i = 0; i < l; i++) {
-				if(_mouseX > _offsetX + _scaleAnnotationListX[i] - _annotationRadius && _mouseX < _offsetX + _scaleAnnotationListX[i] + _annotationRadius && 
-					_mouseY > _offsetY + _scaleAnnotationListY[i] - _annotationRadius && _mouseY < _offsetY + _scaleAnnotationListY[i] + _annotationRadius) {
-					
-					if (_prevAnnotationIndex != i) {
-						removeAnnotations();
-						_prevAnnotationIndex = i;
-						showAnnotationAt(i);
-					}
+				if(_mouseX > _offsetX + _scaleAnnotationListX[i] - _annotationRadius && _mouseX < _offsetX + _scaleAnnotationListX[i] + _annotationRadius &&
+				_mouseY > _offsetY + _scaleAnnotationListY[i] - _annotationRadius && _mouseY < _offsetY + _scaleAnnotationListY[i] + _annotationRadius) {
+
+					_canvas.style.cursor = "pointer";
+					_mouseOnAnnotation = i;
+
+					// No need to show the annotation on mouse over now.
+					/*if (_prevAnnotationIndex != i) {
+					 removeAnnotations();
+					 _prevAnnotationIndex = i;
+					 showAnnotationAt(i);
+					 }*/
 					break;
 				}
 			}
 			if (i==l) {
-				removeAnnotations();
+				_canvas.style.cursor = "auto";
+				_mouseOnAnnotation = -1;
+				//Annotations not shown on mouse over. So don't remove.
+				//removeAnnotations();
 			}
-		};		
+		};
 	};
-	
 	function removeAnnotations() {
 		if (_currentAnnotation) {
 			_prevAnnotationIndex = -1;
@@ -342,12 +363,13 @@ $.getJSON("getAnnotations.php", {
 			_currentAnnotation = false;
 		}
 	}
+
 	/**
 	 * Highlights the annotation at index i
 	 * @param i - the index of annotation.
 	 */
 	var showAnnotationAt = function (i) {
-		
+
 		// Show annotation on mouse over
 		_currentAnnotation = document.createElement("div");
 		_currentAnnotation.style.position = 'absolute';
@@ -367,7 +389,6 @@ $.getJSON("getAnnotations.php", {
 		//$(_canvas).get(0).parentElement.appendChild(_currentAnnotation);
 		// container.get()[0].appendChild(that.annotationRemoveButton);
 	};
-	
 	mousePosX = function(event) {
 		// Get the mouse position relative to the canvas element.
 		var x = 0;
@@ -412,8 +433,10 @@ $.getJSON("getAnnotations.php", {
 		}
 
 		if(delta) {
-			if(delta < 0) {	zoomInMouse();
-			} else {	zoomOutMouse();
+			if(delta < 0) {
+				zoomInMouse();
+			} else {
+				zoomOutMouse();
 			}
 		}
 
@@ -533,7 +556,8 @@ $.getJSON("getAnnotations.php", {
 		if(tileList.length > 0) {
 			_imageLoader = new ImageLoader({
 				"images" : tileList,
-				"onImageLoaded" : function(name, tile) { tileLoaded(name, tile);
+				"onImageLoaded" : function(name, tile) {
+					tileLoaded(name, tile);
 				}
 			});
 		}
@@ -649,10 +673,9 @@ $.getJSON("getAnnotations.php", {
 		var markerHeight = _markerImage.height / (_zoomLevelMax + 1 - _zoomLevel);
 		var markerWidth = _markerImage.width / (_zoomLevelMax + 1 - _zoomLevel);
 
-
 		_scaleAnnotationListX = [];
 		_scaleAnnotationListY = [];
-		
+
 		for(var j = 0; j < _annotationListX.length; ++j) {
 			_ctx.strokeStyle = "#000";
 			var scaledAnnotationX = _annotationListX[j];
@@ -662,10 +685,10 @@ $.getJSON("getAnnotations.php", {
 				scaledAnnotationX /= scale;
 				scaledAnnotationY /= scale;
 			}
-			
+
 			_scaleAnnotationListX.push(scaledAnnotationX);
 			_scaleAnnotationListY.push(scaledAnnotationY);
-			
+
 			_ctx.drawImage(_markerImage, _offsetX + scaledAnnotationX - markerWidth/2, _offsetY + scaledAnnotationY - markerHeight/2 , markerWidth, markerHeight);
 			// _ctx.fillRect(_offsetX + scaledAnnotationX, _offsetY + scaledAnnotationY, 10, 10);
 
@@ -797,7 +820,8 @@ $.getJSON("getAnnotations.php", {
 		});
 		_imageLoader = new ImageLoader({
 			"images" : imageList,
-			"onAllLoaded" : function() { initialTilesLoaded();
+			"onAllLoaded" : function() {
+				initialTilesLoaded();
 			},
 		});
 
