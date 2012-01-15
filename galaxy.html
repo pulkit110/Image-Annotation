@@ -90,7 +90,7 @@
 			.jqiwarning .jqi .jqibuttons {
 				background-color: #BF5E26;
 			}
-			/*-------------------------------- */ 
+			/*-------------------------------- */
 
 			.fl-annotation {
 				background: transparent url(annotation.png) no-repeat center;
@@ -100,7 +100,8 @@
 				padding: 15px;
 				color: white;
 				text-align: center;
-				//background-color: #ffffff;
+				//
+				background-color: #ffffff;
 			}
 			
 		</style>
@@ -114,6 +115,7 @@
 			<br/>
 			<input type="button" value="Zoom in" onclick="galaxy.zoomInCentre()"/>
 			<input type="button" value="Zoom out" onclick="galaxy.zoomOutCentre()"/>
+			<input type="button" class="showhideannotation" value="Hide Annotations"/>
 			<a href="http://hubblesite.org/newscenter/archive/releases/2005/01/image/a/">Image of Spiral Galaxy NGC 1300 from Hubble Site</a>
 		</p>
 		</div>
@@ -127,17 +129,16 @@
 		<script type="text/javascript" src="jquery-impromptu.3.2.min.js"></script>
 		<script type="text/javascript">
 			var galaxy = new CanvasZoom({
-								'canvas': document.getElementById('zoomCanvas'), 
-								'tilesFolder': "galaxy", 
-								'imageWidth':6637,	//width 
-								'imageHeight':3787,	//height
-								'imageId':1234,	//image id
-								'drawBorder' : true,
-                        'defaultZoom' : 10,
-                        'minZoom' : 10,
-                        'maxZoom' : 14
-										});
-
+				'canvas': document.getElementById('zoomCanvas'),
+				'tilesFolder': "galaxy",
+				'imageWidth':6637,	//width
+				'imageHeight':3787,	//height
+				'imageId':1234,	//image id
+				'drawBorder' : true,
+				'defaultZoom' : 10,
+				'minZoom' : 10,
+				'maxZoom' : 14
+			});
 		</script>
 	</foot>
 </html>

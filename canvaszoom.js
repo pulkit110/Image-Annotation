@@ -65,6 +65,8 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 	var _currentAnnotation = false;
 	var _prevAnnotationIndex = -1;
 
+	var _annotationsShown = true;
+
 	var _imageUrl = "marker.png";
 	var _markerImage = new Image();
 	_markerImage.src = _imageUrl;
@@ -172,6 +174,19 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 		}, FALSE);
 		_ctx = _canvas.getContext('2d');
 
+		// Show/Hide Annotations on button click
+		$('.showhideannotation').click( function() {
+			_annotationsShown = !_annotationsShown;
+			if (_annotationsShown) {
+				this.value = 'Hide Annotations';
+			} else {
+				this.value = 'Show Annotations';
+			}
+			$(this).toggleClass("down");
+			paint();
+		});
+		
+		// Get already existing annotations
 		$.getJSON("getAnnotations.php", {
 			format : "json",
 			imageId: _imageId
@@ -209,6 +224,10 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 		_mouseX = mousePosX(event);
 		_mouseY = mousePosY(event);
 
+		if (!_annotationsShown) {
+			return;	// Don't add any code that should always execute after this line
+		}
+		
 		if(_mouseX === _mouseDownX && _mouseY === _mouseDownY) {
 
 			if (_mouseOnAnnotation !== -1) {
@@ -297,7 +316,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					}
 				});
 				$( '#annotationTextField' ).ckeditor();
-				$('.jqifade').click(function () {
+				$('.jqifade').click( function () {
 					//remove temporarily added annotation when closed by clicking on fade
 					removeLastAnnotationOnCancel();
 				});
@@ -323,7 +342,8 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 			_offsetY = newOffsetY;
 
 			paint();
-		} else {
+		} else if (_annotationsShown) {
+			
 			var element = _canvas;
 			_canvasOffsetX = $(_canvas).offset().left;
 			_canvasOffsetY = $(_canvas).offset().top;
@@ -353,7 +373,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				//Annotations not shown on mouse over. So don't remove.
 				//removeAnnotations();
 			}
-		};
+		}
 	};
 	function removeAnnotations() {
 		if (_currentAnnotation) {
@@ -670,30 +690,31 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 			}
 		}
 
-		var markerHeight = _markerImage.height / (_zoomLevelMax + 1 - _zoomLevel);
-		var markerWidth = _markerImage.width / (_zoomLevelMax + 1 - _zoomLevel);
+		if (_annotationsShown) {
+			var markerHeight = _markerImage.height / (_zoomLevelMax + 1 - _zoomLevel);
+			var markerWidth = _markerImage.width / (_zoomLevelMax + 1 - _zoomLevel);
 
-		_scaleAnnotationListX = [];
-		_scaleAnnotationListY = [];
+			_scaleAnnotationListX = [];
+			_scaleAnnotationListY = [];
 
-		for(var j = 0; j < _annotationListX.length; ++j) {
-			_ctx.strokeStyle = "#000";
-			var scaledAnnotationX = _annotationListX[j];
-			var scaledAnnotationY = _annotationListY[j];
-			for(var iZoomLevel = _zoomLevelMax; iZoomLevel > _zoomLevel; --iZoomLevel) {
-				var scale = _tileZoomArray[iZoomLevel][_aGetWidth] / _tileZoomArray[iZoomLevel - 1][_aGetWidth];
-				scaledAnnotationX /= scale;
-				scaledAnnotationY /= scale;
+			for(var j = 0; j < _annotationListX.length; ++j) {
+				_ctx.strokeStyle = "#000";
+				var scaledAnnotationX = _annotationListX[j];
+				var scaledAnnotationY = _annotationListY[j];
+				for(var iZoomLevel = _zoomLevelMax; iZoomLevel > _zoomLevel; --iZoomLevel) {
+					var scale = _tileZoomArray[iZoomLevel][_aGetWidth] / _tileZoomArray[iZoomLevel - 1][_aGetWidth];
+					scaledAnnotationX /= scale;
+					scaledAnnotationY /= scale;
+				}
+
+				_scaleAnnotationListX.push(scaledAnnotationX);
+				_scaleAnnotationListY.push(scaledAnnotationY);
+
+				_ctx.drawImage(_markerImage, _offsetX + scaledAnnotationX - markerWidth/2, _offsetY + scaledAnnotationY - markerHeight/2 , markerWidth, markerHeight);
+				// _ctx.fillRect(_offsetX + scaledAnnotationX, _offsetY + scaledAnnotationY, 10, 10);
+
 			}
-
-			_scaleAnnotationListX.push(scaledAnnotationX);
-			_scaleAnnotationListY.push(scaledAnnotationY);
-
-			_ctx.drawImage(_markerImage, _offsetX + scaledAnnotationX - markerWidth/2, _offsetY + scaledAnnotationY - markerHeight/2 , markerWidth, markerHeight);
-			// _ctx.fillRect(_offsetX + scaledAnnotationX, _offsetY + scaledAnnotationY, 10, 10);
-
 		}
-
 		if(_drawBorder) {
 
 			//
