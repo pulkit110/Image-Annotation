@@ -103,8 +103,11 @@
 				//
 				background-color: #ffffff;
 			}
-			
+			.annotationError {
+				color: red;
+			}
 		</style>
+		<link type="text/css" href="css/ui-lightness/jquery-ui-1.8.17.custom.css" rel="stylesheet" />
 	</head>
 	<body>
 		<h1>Canvas Zoom Example</h1>
@@ -116,6 +119,7 @@
 			<input type="button" value="Zoom in" onclick="galaxy.zoomInCentre()"/>
 			<input type="button" value="Zoom out" onclick="galaxy.zoomOutCentre()"/>
 			<input type="button" class="showhideannotation" value="Hide Annotations"/>
+
 			<a href="http://hubblesite.org/newscenter/archive/releases/2005/01/image/a/">Image of Spiral Galaxy NGC 1300 from Hubble Site</a>
 		</p>
 		</div>
@@ -125,7 +129,9 @@
 		<script type="text/javascript" src="canvaszoom.js"></script>
 		<script type="text/javascript" src="jquery-1.7.1.min.js"></script>
 		<script type="text/javascript" src="ckeditor/ckeditor.js"></script>
+		<script type="text/javascript" src="ckfinder/ckfinder.js"></script>
 		<script type="text/javascript" src="ckeditor/adapters/jquery.js"></script>
+		<script type="text/javascript" src="jquery-ui-1.8.17.min.js"></script>
 		<script type="text/javascript" src="jquery-impromptu.3.2.min.js"></script>
 		<script type="text/javascript">
 			var galaxy = new CanvasZoom({

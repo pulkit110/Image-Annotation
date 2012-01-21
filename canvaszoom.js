@@ -185,7 +185,6 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 			$(this).toggleClass("down");
 			paint();
 		});
-		
 		// Get already existing annotations
 		$.getJSON("getAnnotations.php", {
 			format : "json",
@@ -227,17 +226,46 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 		if (!_annotationsShown) {
 			return;	// Don't add any code that should always execute after this line
 		}
-		
+
 		if(_mouseX === _mouseDownX && _mouseY === _mouseDownY) {
 
 			if (_mouseOnAnnotation !== -1) {
 				//Show annotation at i
-				var txt = _annotationListText[_mouseOnAnnotation];
-				$.prompt(txt, {
-					buttons: {},
-					persistent: false	//Allow closing box by clicking on facade
+				var txt = "<div class=\"annotationtext\">" + _annotationListText[_mouseOnAnnotation] + "</div>";
+				// $.prompt(txt, {
+				// buttons: {},
+				// persistent: false	//Allow closing box by clicking on facade
+				// });
+				// var temp = $('.annotationtext').find('img');
+				// $('.annotationtext').find('img').width(800);
+				// $('.jqi').draggable();
+				
+				var $dialog = $(txt)
+				//.html('This dialog will show every time!')
+				.dialog({
+					// autoOpen: false,
+					// title: 'Basic Dialog',
+					modal: true,
+					width: 800
 				});
 
+				
+				var $width = $('.annotationtext').find('img').width();
+				var $height = $('.annotationtext').find('img').height();
+				
+				if ($width > 800) {
+					$height = $height * 800.0/$width;	//preserve aspect ratio
+					$width = 800;
+				}
+				
+				$('.annotationtext').find('img').width($width);
+				$('.annotationtext').find('img').heigth($height);
+				
+				// $('#opener').click( function() {
+				// $dialog.dialog('open');
+				// // prevent the default action, e.g., following a link
+				// return false;
+				// });
 			} else {
 
 				//////////////////////Add Annotation///////////////////////////////
@@ -259,67 +287,134 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					_annotationListText.push("Unassigned Tag");
 					paint();
 
-					var txt = 'Enter the tag:<br /> <textarea id="annotationTextField" name="myname" value="" />';
-					function mysubmitfunc(v, m, f) {
-						an = m.children('#annotationTextField');
+					var txt = '<div class="add-annotation-div"><div class=\"annotationError\">Please enter the annotation</div>Enter the tag:<br /> <textarea id="annotationTextField" name="myname" value="" /></div>';
+					// function mysubmitfunc(v, m, f) {
+					// an = m.children('#annotationTextField');
+					//
+					// if(f.myname == "") {
+					// an.css("border", "solid #ff0000 1px");
+					// return false;
+					// } else {
+					// //////////////////////////////////////////////////////////////////////////////////////
+					// $.post("addAnnotation.php", {
+					// x : scaledAnnotationX,
+					// y : scaledAnnotationY,
+					// text : f.myname,
+					// imageId : _imageId
+					// });
+					// //////////////////////////////////////////////////////////////////////////////////////
+					// }
+					//
+					// // Pop the temporarily added annotation (used for showing mark)
+					// _annotationListX.pop();
+					// _annotationListY.pop();
+					// _annotationListText.pop();
+					//
+					// // Add the correct annotation
+					// _annotationListX.push(scaledAnnotationX);
+					// _annotationListY.push(scaledAnnotationY);
+					// _annotationListText.push(f.myname);
+					//
+					// paint();
+					// return true;
+					// }
 
-						if(f.myname == "") {
-							an.css("border", "solid #ff0000 1px");
-							return false;
-						} else {
+				}
+
+				// function removeLastAnnotationOnCancel(v,m,f) {
+				// if (typeof v == "undefined") {
+				// // Pop the temporarily added annotation (used for showing mark)
+				// _annotationListX.pop();
+				// _annotationListY.pop();
+				// _annotationListText.pop();
+				// paint();
+				// }
+				// var editor = CKEDITOR.instances['annotationTextField'];
+				// if (editor) {
+				// editor.destroy(true);
+				// }
+				// }
+
+				var $dialog = $(txt)
+				.dialog({
+					modal: true,
+					//width: 'auto',
+					width: 800,
+					maxWidth: 800,
+					buttons: {
+						"Add Annotation" : function() {
+							var $annotationTextField = $('#annotationTextField');
+							var $annotaionText = $('#annotationTextField').val();
+
+							if ($annotaionText == "") {
+								$('.annotationError').show();
+								return;
+							}
 							//////////////////////////////////////////////////////////////////////////////////////
 							$.post("addAnnotation.php", {
 								x : scaledAnnotationX,
 								y : scaledAnnotationY,
-								text : f.myname,
+								text : $annotaionText,
 								imageId : _imageId
 							});
 							//////////////////////////////////////////////////////////////////////////////////////
+
+							// Pop the temporarily added annotation (used for showing mark)
+							// _annotationListX.pop();
+							// _annotationListY.pop();
+							// _annotationListText.pop();
+
+							$( this ).dialog( "close" );
+
+							// Add the correct annotation
+							_annotationListX.push(scaledAnnotationX);
+							_annotationListY.push(scaledAnnotationY);
+							_annotationListText.push($annotaionText);
+
+							paint();
+
+							// mysubmitfunc();
+						},
+						Cancel: function() {
+							$( this ).dialog( "close" );
 						}
-
-						// Pop the temporarily added annotation (used for showing mark)
-						_annotationListX.pop();
-						_annotationListY.pop();
-						_annotationListText.pop();
-
-						// Add the correct annotation
-						_annotationListX.push(scaledAnnotationX);
-						_annotationListY.push(scaledAnnotationY);
-						_annotationListText.push(f.myname);
-
-						paint();
-						return true;
-					}
-
-				}
-
-				function removeLastAnnotationOnCancel(v,m,f) {
-					if (typeof v == "undefined") {
-						// Pop the temporarily added annotation (used for showing mark)
+					},
+					close: function() {
 						_annotationListX.pop();
 						_annotationListY.pop();
 						_annotationListText.pop();
 						paint();
+						$('.add-annotation-div').remove();
+						var editor = CKEDITOR.instances['annotationTextField'];
+						if (editor) {
+							editor.destroy(true);
+						}
 					}
-					var editor = CKEDITOR.instances['annotationTextField'];
-					if (editor) {
-						editor.destroy(true);
-					}
-				}
+				});
+				$('.annotationError').hide();
+				$( '#annotationTextField' ).ckeditor({
+					filebrowserImageUploadUrl : 'ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images'
+				});
 
-				$.prompt(txt, {
-					submit : mysubmitfunc,
-					callback: removeLastAnnotationOnCancel,
-					persistent: false,	//Allow closing box by clicking on facade
-					buttons : {
-						Ok : true
-					}
-				});
-				$( '#annotationTextField' ).ckeditor();
-				$('.jqifade').click( function () {
-					//remove temporarily added annotation when closed by clicking on fade
-					removeLastAnnotationOnCancel();
-				});
+				// $.prompt(txt, {
+				// submit : mysubmitfunc,
+				// callback: removeLastAnnotationOnCancel,
+				// persistent: false,	//Allow closing box by clicking on facade
+				// buttons : {
+				// Ok : true
+				// }
+				// });
+				// $('.jqifade').click( function () {
+				// //remove temporarily added annotation when closed by clicking on fade
+				// removeLastAnnotationOnCancel();
+				// });
+				// $('.jqi').draggable({
+				// containment: 'parent',
+				// scroll:false,
+				// appendTo: 'body',
+				// helper: 'clone'
+				// });
+
 			}
 			/////////////////////////////////////////////////////
 			// Didn't drag so assume a click.
@@ -343,7 +438,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 
 			paint();
 		} else if (_annotationsShown) {
-			
+
 			var element = _canvas;
 			_canvasOffsetX = $(_canvas).offset().left;
 			_canvasOffsetY = $(_canvas).offset().top;
