@@ -31,7 +31,7 @@
 
  global ImageLoader, window  (for JSLint)
  */
-function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, _imageId) {
+function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, _imageId, _mapName) {
 
 	//var t = this; // make "this" accessible when out of "this" scope and minify
 	var NULL = null, UNDEFINED = undefined, FALSE = false, TRUE = true;
@@ -70,6 +70,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 	var _imageUrl = "marker.png";
 	var _markerImage = new Image();
 	_markerImage.src = _imageUrl;
+	var _wikiRoot = '/mediawiki/index.php?title=';
 
 	// The index of annotation on which the mouse is currently on
 	var _mouseOnAnnotation = -1;
@@ -82,6 +83,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 		_imageWidth = _canvasOrSettings.imageWidth;
 		_imageHeight = _canvasOrSettings.imageHeight;
 		_imageId = _canvasOrSettings.imageId;
+		_mapName = _canvasOrSettings.mapName;
 		_drawBorder = (_canvasOrSettings.drawBorder === UNDEFINED) ? TRUE : _canvasOrSettings.drawBorder;
 		_defaultZoom = (_canvasOrSettings.defaultZoom === UNDEFINED) ? UNDEFINED : _canvasOrSettings.defaultZoom;
 		_minZoom = (_canvasOrSettings.minZoom === UNDEFINED) ? UNDEFINED : _canvasOrSettings.minZoom;
@@ -231,7 +233,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 
 			if (_mouseOnAnnotation !== -1) {
 				//Show annotation at i
-				var txt = "<div class=\"annotationtext\">" + _annotationListText[_mouseOnAnnotation] + "</div>";
+				var txt = "<div class=\"annotationtext\"></div>";//_annotationListText[_mouseOnAnnotation]
 				// $.prompt(txt, {
 				// buttons: {},
 				// persistent: false	//Allow closing box by clicking on facade
@@ -246,10 +248,27 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					// autoOpen: false,
 					// title: 'Basic Dialog',
 					modal: true,
-					width: 800
+					width: 800,
+					close: function() {
+						$('.annotationtext').remove();
+					}
 				});
 
+				var title = 'MapID:' + _imageId + 'Coordinates:' + _annotationListX[_mouseOnAnnotation] + ',' + _annotationListY[_mouseOnAnnotation];
+				var wikiUrl = _wikiRoot + title;
+				$('.annotationtext').append('<iframe id="media-wiki-frame" src="' + wikiUrl + '"/>');
 				
+				$('#media-wiki-frame').siblings().hide();
+		        $('#media-wiki-frame').css('width','100%');
+		        $('#media-wiki-frame').css('height','100%');
+				
+				$('#media-wiki-frame').load(function(){
+			        $('#media-wiki-frame').contents().find('#content').siblings().hide();
+			        $('#media-wiki-frame').contents().find('#content').css('margin-left', '1em');
+			        $(".annotationtext").dialog("option", "height", $('#media-wiki-frame').height());
+		         	$(".annotationtext").dialog("option", "position", "center");
+			    });
+				    
 				var $width = $('.annotationtext').find('img').width();
 				var $height = $('.annotationtext').find('img').height();
 				
@@ -287,60 +306,21 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					_annotationListText.push("Unassigned Tag");
 					paint();
 
-					var txt = '<div class="add-annotation-div"><div class=\"annotationError\">Please enter the annotation</div>Enter the tag:<br /> <textarea id="annotationTextField" name="myname" value="" /></div>';
-					// function mysubmitfunc(v, m, f) {
-					// an = m.children('#annotationTextField');
-					//
-					// if(f.myname == "") {
-					// an.css("border", "solid #ff0000 1px");
-					// return false;
-					// } else {
-					// //////////////////////////////////////////////////////////////////////////////////////
-					// $.post("addAnnotation.php", {
-					// x : scaledAnnotationX,
-					// y : scaledAnnotationY,
-					// text : f.myname,
-					// imageId : _imageId
-					// });
-					// //////////////////////////////////////////////////////////////////////////////////////
-					// }
-					//
-					// // Pop the temporarily added annotation (used for showing mark)
-					// _annotationListX.pop();
-					// _annotationListY.pop();
-					// _annotationListText.pop();
-					//
-					// // Add the correct annotation
-					// _annotationListX.push(scaledAnnotationX);
-					// _annotationListY.push(scaledAnnotationY);
-					// _annotationListText.push(f.myname);
-					//
-					// paint();
-					// return true;
-					// }
-
+					
 				}
-
-				// function removeLastAnnotationOnCancel(v,m,f) {
-				// if (typeof v == "undefined") {
-				// // Pop the temporarily added annotation (used for showing mark)
-				// _annotationListX.pop();
-				// _annotationListY.pop();
-				// _annotationListText.pop();
-				// paint();
-				// }
-				// var editor = CKEDITOR.instances['annotationTextField'];
-				// if (editor) {
-				// editor.destroy(true);
-				// }
-				// }
-
+				scaledAnnotationX = Math.floor(scaledAnnotationX);
+				scaledAnnotationY = Math.floor(scaledAnnotationY);
+				// var txt = '<div class="add-annotation-div"><div class=\"annotationError\">Please enter the annotation</div>Enter the tag:<br /> <textarea id="annotationTextField" name="myname" value="" /></div>';
+				var txt = '<div class="add-annotation-div"> <span>What would you like to create? </span><br/><input class="annotation-button create-wiki-button" type="button" value="Wiki Page">\
+				<br/><input class="annotation-button TBD-button" type="button" value="TBD" disabled="disabled"><br/> <input class="annotation-button TBD-button" type="button" value="TBD" disabled="disabled">\
+				<br/><span>Coordinates: ' + scaledAnnotationX + ', ' + scaledAnnotationY + '<br/>\
+				Map name: ' + _mapName + '</span></div>';
 				var $dialog = $(txt)
 				.dialog({
 					modal: true,
 					//width: 'auto',
-					width: 800,
-					maxWidth: 800,
+					width: 830,
+					maxWidth: 830,
 					buttons: {
 						"Add Annotation" : function() {
 							var $annotationTextField = $('#annotationTextField');
@@ -390,6 +370,57 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 							editor.destroy(true);
 						}
 					}
+				});
+				
+				$('.create-wiki-button').click(function() {
+					var $annotationTextField = $('#annotationTextField');
+					var $annotaionText = $('#annotationTextField').val();
+					var title = 'MapID:' + _imageId + 'Coordinates:' + scaledAnnotationX + ',' + scaledAnnotationY;
+					var wikiUrl = _wikiRoot + title + '&action=edit';
+					$('.add-annotation-div').append('<iframe id="media-wiki-frame" src="' + wikiUrl + '"/>');
+					
+					$('#media-wiki-frame').siblings().hide();
+			        $('#media-wiki-frame').css('width','100%');
+			        $('#media-wiki-frame').css('height','100%');
+					
+					$('#media-wiki-frame').load(function(){
+				        $('#media-wiki-frame').contents().find('#content').siblings().hide();
+				        $('#media-wiki-frame').contents().find('#content').css('margin-left', '1em');
+				        $('#media-wiki-frame').contents().find('#content').find('#wpSave').click(function(){
+				        	$('#media-wiki-frame').load(function(){
+				        		$('.add-annotation-div').remove();
+				        	});
+				        });
+				        $(".add-annotation-div").dialog("option", "height", $('#media-wiki-frame').height());
+			         	$(".add-annotation-div").dialog("option", "position", "center");
+				    });
+				    
+					if ($annotaionText == "") {
+						$('.annotationError').show();
+						return;
+					}
+					//////////////////////////////////////////////////////////////////////////////////////
+					$.post("addAnnotation.php", {
+						x : scaledAnnotationX,
+						y : scaledAnnotationY,
+						text : title,
+						imageId : _imageId
+					});
+					//////////////////////////////////////////////////////////////////////////////////////
+
+					//Pop the temporarily added annotation (used for showing mark)
+					_annotationListX.pop();
+					_annotationListY.pop();
+					_annotationListText.pop();
+
+					// $( this ).dialog( "close" );
+
+					// Add the correct annotation
+					_annotationListX.push(scaledAnnotationX);
+					_annotationListY.push(scaledAnnotationY);
+					_annotationListText.push($annotaionText);
+
+					paint();
 				});
 				$('.annotationError').hide();
 				$( '#annotationTextField' ).ckeditor({
