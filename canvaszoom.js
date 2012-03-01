@@ -264,7 +264,10 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				
 				$('#media-wiki-frame').load(function(){
 			        $('#media-wiki-frame').contents().find('#content').siblings().hide();
+			        $('#media-wiki-frame').contents().find('#mw-head').show();
 			        $('#media-wiki-frame').contents().find('#content').css('margin-left', '1em');
+			        $('#media-wiki-frame').contents().find('#mw-head-base').show();
+			        $('#media-wiki-frame').contents().find('#mw-page-base').show();
 			        $(".annotationtext").dialog("option", "height", $('#media-wiki-frame').height());
 		         	$(".annotationtext").dialog("option", "position", "center");
 			    });
@@ -278,7 +281,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				}
 				
 				$('.annotationtext').find('img').width($width);
-				$('.annotationtext').find('img').heigth($height);
+				$('.annotationtext').find('img').height($height);
 				
 				// $('#opener').click( function() {
 				// $dialog.dialog('open');
@@ -311,9 +314,9 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				scaledAnnotationX = Math.floor(scaledAnnotationX);
 				scaledAnnotationY = Math.floor(scaledAnnotationY);
 				// var txt = '<div class="add-annotation-div"><div class=\"annotationError\">Please enter the annotation</div>Enter the tag:<br /> <textarea id="annotationTextField" name="myname" value="" /></div>';
-				var txt = '<div class="add-annotation-div"> <span>What would you like to create? </span><br/><input class="annotation-button create-wiki-button" type="button" value="Wiki Page">\
+				var txt = '<div class="add-annotation-div"> <br/><span>What would you like to create? </span><br/><br/><input class="annotation-button create-wiki-button" type="button" value="Wiki Page">\
 				<br/><input class="annotation-button TBD-button" type="button" value="TBD" disabled="disabled"><br/> <input class="annotation-button TBD-button" type="button" value="TBD" disabled="disabled">\
-				<br/><span>Coordinates: ' + scaledAnnotationX + ', ' + scaledAnnotationY + '<br/>\
+				<br/><br/><span>Coordinates: ' + scaledAnnotationX + ', ' + scaledAnnotationY + '<br/>\
 				Map name: ' + _mapName + '</span></div>';
 				var $dialog = $(txt)
 				.dialog({
@@ -321,40 +324,8 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					//width: 'auto',
 					width: 830,
 					maxWidth: 830,
+					minHeight: 400,
 					buttons: {
-						"Add Annotation" : function() {
-							var $annotationTextField = $('#annotationTextField');
-							var $annotaionText = $('#annotationTextField').val();
-
-							if ($annotaionText == "") {
-								$('.annotationError').show();
-								return;
-							}
-							//////////////////////////////////////////////////////////////////////////////////////
-							$.post("addAnnotation.php", {
-								x : scaledAnnotationX,
-								y : scaledAnnotationY,
-								text : $annotaionText,
-								imageId : _imageId
-							});
-							//////////////////////////////////////////////////////////////////////////////////////
-
-							// Pop the temporarily added annotation (used for showing mark)
-							// _annotationListX.pop();
-							// _annotationListY.pop();
-							// _annotationListText.pop();
-
-							$( this ).dialog( "close" );
-
-							// Add the correct annotation
-							_annotationListX.push(scaledAnnotationX);
-							_annotationListY.push(scaledAnnotationY);
-							_annotationListText.push($annotaionText);
-
-							paint();
-
-							// mysubmitfunc();
-						},
 						Cancel: function() {
 							$( this ).dialog( "close" );
 						}
@@ -365,13 +336,10 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 						_annotationListText.pop();
 						paint();
 						$('.add-annotation-div').remove();
-						var editor = CKEDITOR.instances['annotationTextField'];
-						if (editor) {
-							editor.destroy(true);
-						}
 					}
 				});
-				
+				$('.annotation-button').button();
+				$('.annotation-button').css('width','120');
 				$('.create-wiki-button').click(function() {
 					var $annotationTextField = $('#annotationTextField');
 					var $annotaionText = $('#annotationTextField').val();
@@ -386,12 +354,15 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					$('#media-wiki-frame').load(function(){
 				        $('#media-wiki-frame').contents().find('#content').siblings().hide();
 				        $('#media-wiki-frame').contents().find('#content').css('margin-left', '1em');
+				        $('#media-wiki-frame').contents().find('#mw-head').show();
+				        $('#media-wiki-frame').contents().find('#p-personal').siblings().hide();
 				        $('#media-wiki-frame').contents().find('#content').find('#wpSave').click(function(){
 				        	$('#media-wiki-frame').load(function(){
 				        		$('.add-annotation-div').remove();
 				        	});
 				        });
-				        $(".add-annotation-div").dialog("option", "height", $('#media-wiki-frame').height());
+				        if ($('#media-wiki-frame').height() > 400)
+				        	$(".add-annotation-div").dialog("option", "height", $('#media-wiki-frame').height());
 			         	$(".add-annotation-div").dialog("option", "position", "center");
 				    });
 				    
@@ -422,29 +393,6 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 
 					paint();
 				});
-				$('.annotationError').hide();
-				$( '#annotationTextField' ).ckeditor({
-					filebrowserImageUploadUrl : 'ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images'
-				});
-
-				// $.prompt(txt, {
-				// submit : mysubmitfunc,
-				// callback: removeLastAnnotationOnCancel,
-				// persistent: false,	//Allow closing box by clicking on facade
-				// buttons : {
-				// Ok : true
-				// }
-				// });
-				// $('.jqifade').click( function () {
-				// //remove temporarily added annotation when closed by clicking on fade
-				// removeLastAnnotationOnCancel();
-				// });
-				// $('.jqi').draggable({
-				// containment: 'parent',
-				// scroll:false,
-				// appendTo: 'body',
-				// helper: 'clone'
-				// });
 
 			}
 			/////////////////////////////////////////////////////
