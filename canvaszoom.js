@@ -241,7 +241,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				// var temp = $('.annotationtext').find('img');
 				// $('.annotationtext').find('img').width(800);
 				// $('.jqi').draggable();
-				
+
 				var $dialog = $(txt)
 				//.html('This dialog will show every time!')
 				.dialog({
@@ -257,37 +257,22 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				var title = 'MapID:' + _imageId + 'Coordinates:' + _annotationListX[_mouseOnAnnotation] + ',' + _annotationListY[_mouseOnAnnotation];
 				var wikiUrl = _wikiRoot + title;
 				$('.annotationtext').append('<iframe id="media-wiki-frame" src="' + wikiUrl + '"/>');
-				
+				$('#media-wiki-frame').hide();
 				$('#media-wiki-frame').siblings().hide();
-		        $('#media-wiki-frame').css('width','100%');
-		        $('#media-wiki-frame').css('height','100%');
-				
-				$('#media-wiki-frame').load(function(){
-			        $('#media-wiki-frame').contents().find('#content').siblings().hide();
-			        $('#media-wiki-frame').contents().find('#mw-head').show();
-			        $('#media-wiki-frame').contents().find('#content').css('margin-left', '1em');
-			        $('#media-wiki-frame').contents().find('#mw-head-base').show();
-			        $('#media-wiki-frame').contents().find('#mw-page-base').show();
-			        $(".annotationtext").dialog("option", "height", $('#media-wiki-frame').height());
-		         	$(".annotationtext").dialog("option", "position", "center");
-			    });
-				    
-				var $width = $('.annotationtext').find('img').width();
-				var $height = $('.annotationtext').find('img').height();
-				
-				if ($width > 800) {
-					$height = $height * 800.0/$width;	//preserve aspect ratio
-					$width = 800;
-				}
-				
-				$('.annotationtext').find('img').width($width);
-				$('.annotationtext').find('img').height($height);
-				
-				// $('#opener').click( function() {
-				// $dialog.dialog('open');
-				// // prevent the default action, e.g., following a link
-				// return false;
-				// });
+				$('#media-wiki-frame').css('width','100%');
+				$('#media-wiki-frame').css('height','100%');
+
+				$('#media-wiki-frame').load( function() {
+					$('#media-wiki-frame').contents().find('#content').siblings().hide();
+					$('#media-wiki-frame').contents().find('#mw-head').show();
+					$('#media-wiki-frame').contents().find('#content').css('margin-left', '1em');
+					$('#media-wiki-frame').contents().find('#mw-head-base').show();
+					$('#media-wiki-frame').contents().find('#mw-page-base').show();
+					$(".annotationtext").dialog("option", "width", $(window).width()*0.8);
+					$(".annotationtext").dialog("option", "height", $(window).height()*.95);
+					$(".annotationtext").dialog("option", "position", "center");
+					$('#media-wiki-frame').show();
+				});
 			} else {
 
 				//////////////////////Add Annotation///////////////////////////////
@@ -309,7 +294,6 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					_annotationListText.push("Unassigned Tag");
 					paint();
 
-					
 				}
 				scaledAnnotationX = Math.floor(scaledAnnotationX);
 				scaledAnnotationY = Math.floor(scaledAnnotationY);
@@ -323,7 +307,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					modal: true,
 					//width: 'auto',
 					width: 830,
-					maxWidth: 830,
+					//maxWidth: 830,
 					minHeight: 400,
 					buttons: {
 						Cancel: function() {
@@ -340,32 +324,39 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				});
 				$('.annotation-button').button();
 				$('.annotation-button').css('width','120');
-				$('.create-wiki-button').click(function() {
+				$('.create-wiki-button').click( function() {
 					var $annotationTextField = $('#annotationTextField');
 					var $annotaionText = $('#annotationTextField').val();
 					var title = 'MapID:' + _imageId + 'Coordinates:' + scaledAnnotationX + ',' + scaledAnnotationY;
 					var wikiUrl = _wikiRoot + title + '&action=edit';
 					$('.add-annotation-div').append('<iframe id="media-wiki-frame" src="' + wikiUrl + '"/>');
-					
+					$('#media-wiki-frame').hide();
 					$('#media-wiki-frame').siblings().hide();
-			        $('#media-wiki-frame').css('width','100%');
-			        $('#media-wiki-frame').css('height','100%');
-					
-					$('#media-wiki-frame').load(function(){
-				        $('#media-wiki-frame').contents().find('#content').siblings().hide();
-				        $('#media-wiki-frame').contents().find('#content').css('margin-left', '1em');
-				        $('#media-wiki-frame').contents().find('#mw-head').show();
-				        $('#media-wiki-frame').contents().find('#p-personal').siblings().hide();
-				        $('#media-wiki-frame').contents().find('#content').find('#wpSave').click(function(){
-				        	$('#media-wiki-frame').load(function(){
-				        		$('.add-annotation-div').remove();
-				        	});
-				        });
-				        if ($('#media-wiki-frame').height() > 400)
-				        	$(".add-annotation-div").dialog("option", "height", $('#media-wiki-frame').height());
-			         	$(".add-annotation-div").dialog("option", "position", "center");
-				    });
-				    
+					$('#media-wiki-frame').css('width','100%');
+					$('#media-wiki-frame').css('height','100%');
+
+					$('#media-wiki-frame').load( function() {
+
+						$('#media-wiki-frame').contents().find('#content').siblings().hide();
+						$('#media-wiki-frame').contents().find('#content').css('margin-left', '1em');
+						$('#media-wiki-frame').contents().find('#mw-head').show();
+						$('#media-wiki-frame').contents().find('#p-personal').siblings().hide();
+						$('#media-wiki-frame').contents().find('#content').find('#wpSave').click( function() {
+							$('#media-wiki-frame').load( function() {
+								$('.add-annotation-div').remove();
+							});
+						});
+						$(".add-annotation-div").dialog("option", "width", $(window).width()*0.8);
+						$(".add-annotation-div").dialog("option", "height", $(window).height()*.95);
+						$(".add-annotation-div").dialog("option", "position", "center");
+						$('#media-wiki-frame').show();
+						//
+						// if ($('#media-wiki-frame').height() > 400)
+						// //$(".add-annotation-div").dialog("option", "height", $('#media-wiki-frame').height());
+						// $(".add-annotation-div").dialog("option", "width", $(window).width()*0.8);
+						// $(".add-annotation-div").dialog("option", "height", $(window).height()*0.8);
+						// $(".add-annotation-div").dialog("option", "position", "center");
+					});
 					if ($annotaionText == "") {
 						$('.annotationError').show();
 						return;
@@ -393,7 +384,6 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 
 					paint();
 				});
-
 			}
 			/////////////////////////////////////////////////////
 			// Didn't drag so assume a click.
