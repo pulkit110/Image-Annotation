@@ -286,6 +286,9 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					$('#media-wiki-frame').contents().find('#content').css('margin-left', '1em');
 					$('#media-wiki-frame').contents().find('#mw-head-base').show();
 					$('#media-wiki-frame').contents().find('#mw-page-base').show();
+					$('#media-wiki-frame').contents().find('#footer').show();
+					$('#media-wiki-frame').contents().find('#footer-info').show();
+						$('#media-wiki-frame').contents().find('#footer-info').siblings().hide();
 					$(".annotationtext").dialog("option", "width", $(window).width()*0.8);
 					$(".annotationtext").dialog("option", "height", $(window).height()*.95);
 					$(".annotationtext").dialog("option", "position", "center");
