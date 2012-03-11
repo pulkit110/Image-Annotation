@@ -72,6 +72,22 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 	_markerImage.src = _imageUrl;
 	var _wikiRoot = '/mediawiki/index.php?title=';
 
+	var _spinOpts = {
+		lines: 12, // The number of lines to draw
+		length: 7, // The length of each line
+		width: 4, // The line thickness
+		radius: 10, // The radius of the inner circle
+		color: '#000', // #rgb or #rrggbb
+		speed: 1, // Rounds per second
+		trail: 60, // Afterglow percentage
+		shadow: true, // Whether to render a shadow
+		hwaccel: false, // Whether to use hardware acceleration
+		className: 'spinner', // The CSS class to assign to the spinner
+		zIndex: 2e9 // The z-index (defaults to 2000000000)
+	};
+	var _spinTarget = document.body;//getElementById('foo');
+	var _spinner = new Spinner(_spinOpts);//.spin(target);
+
 	// The index of annotation on which the mouse is currently on
 	var _mouseOnAnnotation = -1;
 
@@ -250,6 +266,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					modal: true,
 					width: 800,
 					close: function() {
+						_spinner.stop();
 						$('.annotationtext').remove();
 					}
 				});
@@ -258,6 +275,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				var wikiUrl = _wikiRoot + title;
 				$('.annotationtext').append('<iframe id="media-wiki-frame" src="' + wikiUrl + '"/>');
 				$('#media-wiki-frame').hide();
+				_spinner.spin(_spinTarget);
 				$('#media-wiki-frame').siblings().hide();
 				$('#media-wiki-frame').css('width','100%');
 				$('#media-wiki-frame').css('height','100%');
@@ -271,6 +289,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					$(".annotationtext").dialog("option", "width", $(window).width()*0.8);
 					$(".annotationtext").dialog("option", "height", $(window).height()*.95);
 					$(".annotationtext").dialog("option", "position", "center");
+					_spinner.stop();
 					$('#media-wiki-frame').show();
 				});
 			} else {
@@ -315,6 +334,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 						}
 					},
 					close: function() {
+						_spinner.stop();
 						_annotationListX.pop();
 						_annotationListY.pop();
 						_annotationListText.pop();
@@ -331,6 +351,8 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					var wikiUrl = _wikiRoot + title + '&action=edit';
 					$('.add-annotation-div').append('<iframe id="media-wiki-frame" src="' + wikiUrl + '"/>');
 					$('#media-wiki-frame').hide();
+					_spinner.spin(_spinTarget);
+
 					$('#media-wiki-frame').siblings().hide();
 					$('#media-wiki-frame').css('width','100%');
 					$('#media-wiki-frame').css('height','100%');
@@ -349,6 +371,8 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 						$(".add-annotation-div").dialog("option", "width", $(window).width()*0.8);
 						$(".add-annotation-div").dialog("option", "height", $(window).height()*.95);
 						$(".add-annotation-div").dialog("option", "position", "center");
+						_spinner.stop();
+
 						$('#media-wiki-frame').show();
 						//
 						// if ($('#media-wiki-frame').height() > 400)
