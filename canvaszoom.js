@@ -271,7 +271,8 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					}
 				});
 
-				var title = 'MapID:' + _imageId + 'Coordinates:' + _annotationListX[_mouseOnAnnotation] + ',' + _annotationListY[_mouseOnAnnotation];
+				var title = _annotationListText[_mouseOnAnnotation];//'MapID:' + _imageId + 'Coordinates:' + _annotationListX[_mouseOnAnnotation] + ',' + _annotationListY[_mouseOnAnnotation];
+				alert(title);
 				var wikiUrl = _wikiRoot + title;
 				$('.annotationtext').append('<iframe id="media-wiki-frame" src="' + wikiUrl + '"/>');
 				$('#media-wiki-frame').hide();
@@ -320,8 +321,14 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				scaledAnnotationX = Math.floor(scaledAnnotationX);
 				scaledAnnotationY = Math.floor(scaledAnnotationY);
 				// var txt = '<div class="add-annotation-div"><div class=\"annotationError\">Please enter the annotation</div>Enter the tag:<br /> <textarea id="annotationTextField" name="myname" value="" /></div>';
-				var txt = '<div class="add-annotation-div"> <br/><span>What would you like to create? </span><br/><br/><input class="annotation-button create-wiki-button" type="button" value="Wiki Page">\
+				var txt = '<div class="add-annotation-div"> <div style="float: left; width: 30%;"><br/><br/><br/><input class="annotation-button create-wiki-button" type="button" value="Wiki Page">\
 				<br/><input class="annotation-button TBD-button" type="button" value="TBD" disabled="disabled"><br/> <input class="annotation-button TBD-button" type="button" value="TBD" disabled="disabled">\
+				</div>\
+				<div style="float: right; width: 70%;">\
+				<div class=\"annotationError\">Please enter the title</div>\
+				<br/><span>What would you like to create? </span><br/><br/>\
+				<input id="annotationTextField" type="text" size="25">\
+				</div>\
 				<br/><br/><span>Coordinates: ' + scaledAnnotationX + ', ' + scaledAnnotationY + '<br/>\
 				Map name: ' + _mapName + '</span></div>';
 				var $dialog = $(txt)
@@ -348,9 +355,14 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				$('.annotation-button').button();
 				$('.annotation-button').css('width','120');
 				$('.create-wiki-button').click( function() {
-					var $annotationTextField = $('#annotationTextField');
-					var $annotaionText = $('#annotationTextField').val();
-					var title = 'MapID:' + _imageId + 'Coordinates:' + scaledAnnotationX + ',' + scaledAnnotationY;
+					var annotationTextField = $('#annotationTextField');
+					var annotaionText = $('#annotationTextField').val();
+					if (annotaionText == "") {
+						$('.annotationError').show();
+						return;
+					}
+					//var title = 'MapID:' + _imageId + 'Coordinates:' + scaledAnnotationX + ',' + scaledAnnotationY;
+					var title = _mapName + ':' + annotaionText;
 					var wikiUrl = _wikiRoot + title + '&action=edit';
 					$('.add-annotation-div').append('<iframe id="media-wiki-frame" src="' + wikiUrl + '"/>');
 					$('#media-wiki-frame').hide();
@@ -367,7 +379,10 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 						$('#media-wiki-frame').contents().find('#mw-head').show();
 						$('#media-wiki-frame').contents().find('#p-personal').siblings().hide();
 						$('#media-wiki-frame').contents().find('#content').find('#wpSave').click( function() {
+							_spinner.spin(_spinTarget);
+							$('#media-wiki-frame').hide();
 							$('#media-wiki-frame').load( function() {
+								_spinner.stop();
 								$('.add-annotation-div').remove();
 							});
 						});
@@ -384,10 +399,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 						// $(".add-annotation-div").dialog("option", "height", $(window).height()*0.8);
 						// $(".add-annotation-div").dialog("option", "position", "center");
 					});
-					if ($annotaionText == "") {
-						$('.annotationError').show();
-						return;
-					}
+
 					//////////////////////////////////////////////////////////////////////////////////////
 					$.post("addAnnotation.php", {
 						x : scaledAnnotationX,
@@ -407,7 +419,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					// Add the correct annotation
 					_annotationListX.push(scaledAnnotationX);
 					_annotationListY.push(scaledAnnotationY);
-					_annotationListText.push($annotaionText);
+					_annotationListText.push(title);
 
 					paint();
 				});
