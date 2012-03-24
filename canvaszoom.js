@@ -72,7 +72,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 	_markerImage.src = _imageUrl;
 	var _wikiRoot = '/mediawiki/index.php?title=';
 
-	var _spinOpts = {
+	/*var _spinOpts = {
 		lines: 12, // The number of lines to draw
 		length: 7, // The length of each line
 		width: 4, // The line thickness
@@ -86,7 +86,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 		zIndex: 2e9 // The z-index (defaults to 2000000000)
 	};
 	var _spinTarget = document.body;//getElementById('foo');
-	var _spinner = new Spinner(_spinOpts);//.spin(target);
+	var _spinner = new Spinner(_spinOpts);//.spin(target);*/
 
 	// The index of annotation on which the mouse is currently on
 	var _mouseOnAnnotation = -1;
@@ -266,17 +266,17 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					modal: true,
 					width: 800,
 					close: function() {
-						_spinner.stop();
+					//	_spinner.stop();
 						$('.annotationtext').remove();
 					}
 				});
 
 				var title = _annotationListText[_mouseOnAnnotation];//'MapID:' + _imageId + 'Coordinates:' + _annotationListX[_mouseOnAnnotation] + ',' + _annotationListY[_mouseOnAnnotation];
-				alert(title);
+				//alert(title);
 				var wikiUrl = _wikiRoot + title;
 				$('.annotationtext').append('<iframe id="media-wiki-frame" src="' + wikiUrl + '"/>');
 				$('#media-wiki-frame').hide();
-				_spinner.spin(_spinTarget);
+				//_spinner.spin(_spinTarget);
 				$('#media-wiki-frame').siblings().hide();
 				$('#media-wiki-frame').css('width','100%');
 				$('#media-wiki-frame').css('height','100%');
@@ -290,10 +290,11 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					$('#media-wiki-frame').contents().find('#footer').show();
 					$('#media-wiki-frame').contents().find('#footer-info').show();
 						$('#media-wiki-frame').contents().find('#footer-info').siblings().hide();
+					//Adjust View Window//
 					$(".annotationtext").dialog("option", "width", $(window).width()*0.8);
-					$(".annotationtext").dialog("option", "height", $(window).height()*.95);
+					$(".annotationtext").dialog("option", "height", $(window).height()*.8);
 					$(".annotationtext").dialog("option", "position", "center");
-					_spinner.stop();
+					//_spinner.stop();
 					$('#media-wiki-frame').show();
 				});
 			} else {
@@ -344,7 +345,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 						}
 					},
 					close: function() {
-						_spinner.stop();
+					//	_spinner.stop();
 						_annotationListX.pop();
 						_annotationListY.pop();
 						_annotationListText.pop();
@@ -366,7 +367,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					var wikiUrl = _wikiRoot + title + '&action=edit';
 					$('.add-annotation-div').append('<iframe id="media-wiki-frame" src="' + wikiUrl + '"/>');
 					$('#media-wiki-frame').hide();
-					_spinner.spin(_spinTarget);
+					//_spinner.spin(_spinTarget);
 
 					$('#media-wiki-frame').siblings().hide();
 					$('#media-wiki-frame').css('width','100%');
@@ -379,17 +380,24 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 						$('#media-wiki-frame').contents().find('#mw-head').show();
 						$('#media-wiki-frame').contents().find('#p-personal').siblings().hide();
 						$('#media-wiki-frame').contents().find('#content').find('#wpSave').click( function() {
-							_spinner.spin(_spinTarget);
+							//_spinner.spin(_spinTarget);
 							$('#media-wiki-frame').hide();
 							$('#media-wiki-frame').load( function() {
-								_spinner.stop();
-								$('.add-annotation-div').remove();
+							setTimeout(
+							function(){
+							$('.add-annotation-div').remove();
+							},
+							100
+							);
+							//	_spinner.stop();
+							//	$('.add-annotation-div').remove();
 							});
 						});
+						//Adjust Edit Window//
 						$(".add-annotation-div").dialog("option", "width", $(window).width()*0.8);
 						$(".add-annotation-div").dialog("option", "height", $(window).height()*.95);
 						$(".add-annotation-div").dialog("option", "position", "center");
-						_spinner.stop();
+						//_spinner.stop();
 
 						$('#media-wiki-frame').show();
 						//
@@ -461,20 +469,20 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 					_canvas.style.cursor = "pointer";
 					_mouseOnAnnotation = i;
 
-					// No need to show the annotation on mouse over now.
-					/*if (_prevAnnotationIndex != i) {
+					//Show annotation on mouse over
+					if (_prevAnnotationIndex != i) {
 					 removeAnnotations();
 					 _prevAnnotationIndex = i;
 					 showAnnotationAt(i);
-					 }*/
+					 }
 					break;
 				}
 			}
 			if (i==l) {
 				_canvas.style.cursor = "auto";
 				_mouseOnAnnotation = -1;
-				//Annotations not shown on mouse over. So don't remove.
-				//removeAnnotations();
+				//Remove already shown annotation
+				removeAnnotations();
 			}
 		}
 	};
@@ -502,8 +510,8 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 		//that.currentAnnotation.style.lineHeight = that.annotationList[i].h + 'px';
 		_currentAnnotation.className += ' fl-annotation';
 
-		_currentAnnotation.innerHTML = _annotationListText[i];
-
+		_currentAnnotation.innerHTML = _annotationListText[i].substr(_annotationListText[i].indexOf(':')+1);
+		
 		// //Create cross button
 		// that.annotationRemoveButton = createCrossButton(that.annotationList[i], i);
 
