@@ -144,8 +144,8 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 		for( iColumn = 0; iColumn < columns; iColumn++) {
 
 			for( iRow = 0; iRow < rows; iRow++) {
-
-				tileZoomLevel[iColumn][iRow][_aGetTile] = _imageLoader.getImageById(imageId++);
+				tileZoomLevel[iColumn][iRow][_aGetTile] = _imageLoader.getImageById(imageId);
+				++imageId;
 			}
 		}
 
@@ -258,15 +258,10 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				// $('.annotationtext').find('img').width(800);
 				// $('.jqi').draggable();
 
-				var $dialog = $(txt)
-				//.html('This dialog will show every time!')
-				.dialog({
-					// autoOpen: false,
-					// title: 'Basic Dialog',
+				var dialog = $(txt).dialog({
 					modal: true,
 					width: 800,
 					close: function() {
-					//	_spinner.stop();
 						$('.annotationtext').remove();
 					}
 				});
@@ -292,7 +287,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 						$('#media-wiki-frame').contents().find('#footer-info').siblings().hide();
 					//Adjust View Window//
 					$(".annotationtext").dialog("option", "width", $(window).width()*0.8);
-					$(".annotationtext").dialog("option", "height", $(window).height()*.8);
+					$(".annotationtext").dialog("option", "height", $(window).height()*0.8);
 					$(".annotationtext").dialog("option", "position", "center");
 					//_spinner.stop();
 					$('#media-wiki-frame').show();
@@ -322,7 +317,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				scaledAnnotationX = Math.floor(scaledAnnotationX);
 				scaledAnnotationY = Math.floor(scaledAnnotationY);
 				// var txt = '<div class="add-annotation-div"><div class=\"annotationError\">Please enter the annotation</div>Enter the tag:<br /> <textarea id="annotationTextField" name="myname" value="" /></div>';
-				var txt = '<div class="add-annotation-div"> <div style="float: left; width: 30%;"><br/><br/><br/><input class="annotation-button create-wiki-button" type="button" value="Wiki Page">\
+				var txt1 = '<div class="add-annotation-div"> <div style="float: left; width: 30%;"><br/><br/><br/><input class="annotation-button create-wiki-button" type="button" value="Wiki Page">\
 				<br/><input class="annotation-button TBD-button" type="button" value="TBD" disabled="disabled"><br/> <input class="annotation-button TBD-button" type="button" value="TBD" disabled="disabled">\
 				</div>\
 				<div style="float: right; width: 70%;">\
@@ -332,12 +327,9 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				</div>\
 				<br/><br/><span>Coordinates: ' + scaledAnnotationX + ', ' + scaledAnnotationY + '<br/>\
 				Map name: ' + _mapName + '</span></div>';
-				var $dialog = $(txt)
-				.dialog({
+				var dialog1 = $(txt1).dialog({
 					modal: true,
-					//width: 'auto',
 					width: 830,
-					//maxWidth: 830,
 					minHeight: 400,
 					buttons: {
 						Cancel: function() {
@@ -345,7 +337,6 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 						}
 					},
 					close: function() {
-					//	_spinner.stop();
 						_annotationListX.pop();
 						_annotationListY.pop();
 						_annotationListText.pop();
@@ -358,7 +349,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 				$('.create-wiki-button').click( function() {
 					var annotationTextField = $('#annotationTextField');
 					var annotaionText = $('#annotationTextField').val();
-					if (annotaionText == "") {
+					if (annotaionText === "" || annotaionText === undefined) {
 						$('.annotationError').show();
 						return;
 					}
@@ -383,19 +374,14 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 							//_spinner.spin(_spinTarget);
 							$('#media-wiki-frame').hide();
 							$('#media-wiki-frame').load( function() {
-							setTimeout(
-							function(){
-							$('.add-annotation-div').remove();
-							},
-							100
-							);
-							//	_spinner.stop();
-							//	$('.add-annotation-div').remove();
+								setTimeout(function() {
+										$('.add-annotation-div').remove();
+									}, 100);
 							});
 						});
 						//Adjust Edit Window//
 						$(".add-annotation-div").dialog("option", "width", $(window).width()*0.8);
-						$(".add-annotation-div").dialog("option", "height", $(window).height()*.95);
+						$(".add-annotation-div").dialog("option", "height", $(window).height()*0.95);
 						$(".add-annotation-div").dialog("option", "position", "center");
 						//_spinner.stop();
 
@@ -524,7 +510,10 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 		// Get the mouse position relative to the canvas element.
 		var x = 0;
 
-		if(event.layerX || event.layerX === 0) {// Firefox
+		var is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+		if (is_chrome && (event.clientX || event.clientX === 0)) { // Chrome
+			x = event.clientX - _canvas.offsetLeft;
+		} else if(event.layerX || event.layerX === 0) {// Firefox
 			x = event.layerX - _canvas.offsetLeft;
 		} else if(event.offsetX || event.offsetX === 0) {// Opera
 			x = event.offsetX;
@@ -535,7 +524,10 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 	mousePosY = function(event) {
 		var y = 0;
 
-		if(event.layerY || event.layerY === 0) {// Firefox
+		var is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+		if (is_chrome && (event.clientY || event.clientY === 0)) { // Chrome
+			y = event.clientY - _canvas.offsetTop;
+		} else if(event.layerY || event.layerY === 0) {// Firefox
 			y = event.layerY - _canvas.offsetTop;
 		} else if(event.offsetY || event.offsetY === 0) {// Opera
 			y = event.offsetY;
@@ -914,10 +906,10 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 		_zoomLevel = _defaultZoom;
 
 		if(_minZoom > _zoomLevelMin) {
-			_zoomLevelMin = _minZoom
+			_zoomLevelMin = _minZoom;
 		}
 		if(_maxZoom < _zoomLevelMax) {
-			_zoomLevelMax = _maxZoom
+			_zoomLevelMax = _maxZoom;
 		}
 
 		if(_zoomLevelMin > _zoomLevelMax) {
@@ -940,9 +932,10 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 			for( iRow = 0; iRow < rows; iRow++) {
 
 				imageList.push({
-					"id" : imageId++,
+					"id" : imageId,
 					"file" : getTileFile(_zoomLevel, iColumn, iRow)
 				});
+				++imageId;
 			}
 		}
 
@@ -954,7 +947,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 			"images" : imageList,
 			"onAllLoaded" : function() {
 				initialTilesLoaded();
-			},
+			}
 		});
 
 	}());
