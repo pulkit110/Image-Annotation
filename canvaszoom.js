@@ -508,7 +508,7 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 	};
 	mousePosX = function(event) {
 		// Get the mouse position relative to the canvas element.
-		var x = 0;
+		/*var x = 0;
 
 		var is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
 		if (is_chrome && (event.clientX || event.clientX === 0)) { // Chrome
@@ -519,10 +519,28 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 			x = event.offsetX;
 		}
 
-		return x;
+		return x;*/
+		
+		var totalOffsetX = 0;
+	
+		var totalOffsetY = 0;
+		var canvasX = 0;
+		var canvasY = 0;
+		var currentElement = _canvas;
+	
+		do{
+			totalOffsetX += currentElement.offsetLeft;
+			totalOffsetY += currentElement.offsetTop;
+		}while(currentElement = currentElement.offsetParent)
+
+		canvasX = event.pageX - totalOffsetX;
+		canvasY = event.pageY - totalOffsetY;
+
+		return canvasX;
+		
 	};
 	mousePosY = function(event) {
-		var y = 0;
+		/*var y = 0;
 
 		var is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
 		if (is_chrome && (event.clientY || event.clientY === 0)) { // Chrome
@@ -533,7 +551,23 @@ function CanvasZoom(_canvasOrSettings, _tilesFolder, _imageWidth, _imageHeight, 
 			y = event.offsetY;
 		}
 
-		return y;
+		return y;*/
+		var totalOffsetX = 0;
+	
+		var totalOffsetY = 0;
+		var canvasX = 0;
+		var canvasY = 0;
+		var currentElement = _canvas;
+	
+		do{
+			totalOffsetX += currentElement.offsetLeft;
+			totalOffsetY += currentElement.offsetTop;
+		}while(currentElement = currentElement.offsetParent)
+
+		canvasX = event.pageX - totalOffsetX;
+		canvasY = event.pageY - totalOffsetY;    
+
+		return canvasY;
 	};
 	mouseOut = function(event) {
 		// removeAnnotations();
